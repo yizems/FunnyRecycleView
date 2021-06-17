@@ -2,29 +2,55 @@ package cn.yize.funny.recycleview.widget
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.View
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import cn.yize.funny.recycleview.Gravity
 import cn.yize.funny.recycleview.adapter.SimpleTextAdapter
+import cn.yize.funny.recycleview.config.Config
+import cn.yize.funny.recycleview.config.DefaultConfigOwner
 import cn.yize.funny.recycleview.decoration.WheelDecoration
 import cn.yize.funny.recycleview.layoutmanager.wheel.WheelLayoutManager
+import cn.yize.funny.recycleview.listener.transform.TextViewColorSizeTransform
 
+/**
+ * 简单 的文字 选择器
+ */
 class TextPickerRecycleView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : RecyclerView(context, attrs, defStyleAttr) {
 
+
+    companion object : DefaultConfigOwner {
+        override var defaultConfig: Config = Config.DEFAULT_CONFIG.copy(
+            visibleCount = 5,
+            orientation = cn.yize.funny.recycleview.Orientation.VERTICAL,
+            gravity = Gravity.CENTER,
+            smoothSpeed = 10F,
+            childAlpha = 1F,
+            scale = 1F,
+            transformView = false,
+            showDivider = true,
+            dividerColor = 0xFFE4E4E4.toInt(),
+            dividerHeightDp = 0.5F,
+            dividerPadding = 0F,
+            selectTextColor = 0xFF303133.toInt(),
+            unSelectTextColor = 0xFF909399.toInt(),
+            selectTextSizeSp = 18F,
+            unSelectTextSizeSp = 18F,
+        )
+
+    }
+
+
     //region WheelLayoutManager 属性
 
-
-    var visibleCount: Int = 5
+    var visibleCount: Int = defaultConfig.visibleCount
         set(value) {
             field = value
             setupLayoutManager()
         }
-    var orientation: cn.yize.funny.recycleview.Orientation = WheelLayoutManager.DEFAULT_ORIENTATION
+    var orientation: cn.yize.funny.recycleview.Orientation = defaultConfig.orientation
         set(value) {
             field = value
             setupLayoutManager()
@@ -35,22 +61,22 @@ class TextPickerRecycleView @JvmOverloads constructor(
             setupLayoutManager()
         }
 
-    var smoothSpeed: Float = WheelLayoutManager.DEFAULT_SMOOTH_SPEED
+    var smoothSpeed: Float = defaultConfig.smoothSpeed
         set(value) {
             field = value
             setupLayoutManager()
         }
-    var childAlpha: Float = WheelLayoutManager.DEFAULT_ALPHA
+    var childAlpha: Float = defaultConfig.childAlpha
         set(value) {
             field = value
             setupLayoutManager()
         }
-    var scale: Float = WheelLayoutManager.DEFAULT_SCALE
+    var scale: Float = defaultConfig.scale
         set(value) {
             field = value
             setupLayoutManager()
         }
-    var transformView: Boolean = WheelLayoutManager.DEFAULT_TRANSFORM_VIEW
+    var transformView: Boolean = defaultConfig.transformView
         set(value) {
             field = value
             setupLayoutManager()
@@ -61,22 +87,22 @@ class TextPickerRecycleView @JvmOverloads constructor(
     //region WheelDecoration 属性
 
 
-    var showDivider: Boolean = true
+    var showDivider: Boolean = defaultConfig.showDivider
         set(value) {
             field = value
             setupLayoutManager()
         }
-    var dividerColor: Int = 0xFFE4E4E4.toInt()
+    var dividerColor: Int = defaultConfig.dividerColor
         set(value) {
             field = value
             setupLayoutManager()
         }
-    var heightDp: Float = 0.5F
+    var dividerHeightDp: Float = defaultConfig.dividerHeightDp
         set(value) {
             field = value
             setupLayoutManager()
         }
-    var dividerPadding: Float = 0F
+    var dividerPadding: Float = defaultConfig.dividerPadding
         set(value) {
             field = value
             setupLayoutManager()
@@ -87,23 +113,23 @@ class TextPickerRecycleView @JvmOverloads constructor(
 
     //region 文字属性
 
-    var selectTextColor: Int = 0xFF303133.toInt()
+    var selectTextColor: Int = defaultConfig.selectTextColor
         set(value) {
             field = value
             setupLayoutManager()
         }
-    var unSelectTextColor: Int = 0xFF909399.toInt()
+    var unSelectTextColor: Int = defaultConfig.unSelectTextColor
         set(value) {
             field = value
             setupLayoutManager()
         }
 
-    var selectTextSizeSp: Float = 18F
+    var selectTextSizeSp: Float = defaultConfig.selectTextSizeSp
         set(value) {
             field = value
             setupLayoutManager()
         }
-    var unSelectTextSizeSp: Float = 18F
+    var unSelectTextSizeSp: Float = defaultConfig.unSelectTextSizeSp
         set(value) {
             field = value
             setupLayoutManager()
@@ -131,7 +157,7 @@ class TextPickerRecycleView @JvmOverloads constructor(
         }
 
         val decoration =
-            if (showDivider) WheelDecoration(context, dividerColor, heightDp, dividerPadding)
+            if (showDivider) WheelDecoration(context, dividerColor, dividerHeightDp, dividerPadding)
             else null
 
         WheelLayoutManager(
@@ -139,19 +165,11 @@ class TextPickerRecycleView @JvmOverloads constructor(
             childAlpha, scale, transformView,
         ).apply {
 
-            addOnItemFillListener(object : WheelLayoutManager.OnItemFillListener {
-                override fun onItemSelected(itemView: View, position: Int) {
-                    val textView = itemView as TextView
-                    textView.textSize = selectTextSizeSp
-                    textView.setTextColor(selectTextColor)
-                }
-
-                override fun onItemUnSelected(itemView: View, position: Int) {
-                    val textView = itemView as TextView
-                    textView.textSize = unSelectTextSizeSp
-                    textView.setTextColor(unSelectTextColor)
-                }
-            })
+            addOnItemFillListener(
+                TextViewColorSizeTransform(
+                    selectTextColor, unSelectTextColor, selectTextSizeSp, unSelectTextSizeSp
+                )
+            )
             attach(this@TextPickerRecycleView, decoration)
         }
     }

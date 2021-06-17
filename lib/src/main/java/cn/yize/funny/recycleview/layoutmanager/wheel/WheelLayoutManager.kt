@@ -3,38 +3,44 @@ package cn.yize.funny.recycleview.layoutmanager.wheel
 import android.graphics.PointF
 import android.graphics.Rect
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.View
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.OrientationHelper
 import androidx.recyclerview.widget.RecyclerView
 import cn.yize.funny.recycleview.Gravity
 import cn.yize.funny.recycleview.Orientation
+import cn.yize.funny.recycleview.config.Config
+import cn.yize.funny.recycleview.config.DefaultConfigOwner
 import cn.yize.funny.recycleview.decoration.WheelDecoration
+import cn.yize.funny.recycleview.listener.IListenerOwner
+import cn.yize.funny.recycleview.listener.OnItemScrollListener
+import cn.yize.funny.recycleview.listener.OnItemSelectedListener
 import cn.yize.funny.recycleview.snaphelper.GravitySnapHelper
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
 class WheelLayoutManager(
     /** 显示的条目 */
-    val visibleCount: Int = 5,
-    val orientation: Orientation = DEFAULT_ORIENTATION,
-    val gravity: Gravity = Gravity.CENTER,
+    val visibleCount: Int = defaultConfig.visibleCount,
+    val orientation: Orientation = defaultConfig.orientation,
+    val gravity: Gravity = defaultConfig.gravity,
     /** [smoothScrollToPosition] 的速度 倍数, 值越大,速度越慢 */
-    private val smoothSpeed: Float = DEFAULT_SMOOTH_SPEED,
-    private val alpha: Float = DEFAULT_ALPHA,
-    private val scale: Float = DEFAULT_SCALE,
-    private val transformView: Boolean = DEFAULT_TRANSFORM_VIEW
+    private val smoothSpeed: Float = defaultConfig.smoothSpeed,
+    private val alpha: Float = defaultConfig.childAlpha,
+    private val scale: Float = defaultConfig.scale,
+    private val transformView: Boolean = defaultConfig.transformView
 ) : RecyclerView.LayoutManager(),
-    RecyclerView.SmoothScroller.ScrollVectorProvider {
+    RecyclerView.SmoothScroller.ScrollVectorProvider,
+    IListenerOwner {
 
 
-    companion object {
-        const val DEFAULT_SMOOTH_SPEED = 10F
-        val DEFAULT_ORIENTATION = Orientation.VERTICAL
-        const val DEFAULT_ALPHA = 0.8F
-        const val DEFAULT_SCALE = 0.9F
-        const val DEFAULT_TRANSFORM_VIEW = false
+    companion object : DefaultConfigOwner {
+        override var defaultConfig: Config =
+            Config.DEFAULT_CONFIG.copy(
+                transformView = true,
+                scale = 0.9F,
+                childAlpha = 0.8F,
+            )
     }
 
 
@@ -66,7 +72,7 @@ class WheelLayoutManager(
     private val mOnItemSelectedListener = mutableSetOf<OnItemSelectedListener>()
 
     //子view填充或滚动监听器的集合
-    private val mOnItemFillListener = mutableSetOf<OnItemFillListener>()
+    private val mOnItemScrollListener = mutableSetOf<OnItemScrollListener>()
 
     init {
         if (gravity == Gravity.CENTER && visibleCount % 2 == 0) {
@@ -133,7 +139,7 @@ class WheelLayoutManager(
 
     override fun onLayoutCompleted(state: RecyclerView.State?) {
         super.onLayoutCompleted(state)
-        dispatchOnItemSelectedListener()
+        dispatchOnItemSelected(getCurrentPosition())
     }
 
     /**
@@ -401,9 +407,9 @@ class WheelLayoutManager(
                 }
 
                 if (currentItem == position) {
-                    onItemSelected(child, position)
+                    dispatchOnItemScrollInSelected(child, position)
                 } else {
-                    onItemUnSelected(child, position)
+                    dispatchOnItemScrollOutSelected(child, position)
                 }
             }
     }
@@ -413,7 +419,6 @@ class WheelLayoutManager(
         if (positionDelta == 0) return maxValue
 
         return minValue
-
 
 //        val space = visibleCount / 2
 //
@@ -523,81 +528,62 @@ class WheelLayoutManager(
             }
 
             if (send) {
-                dispatchOnItemSelectedListener()
+                dispatchOnItemSelected(getCurrentPosition())
             }
         }
     }
 
-    /**
-     * 分发回调OnItemSelectedListener
-     */
-    private fun dispatchOnItemSelectedListener() {
-        if (mOnItemSelectedListener.isEmpty() || childCount == 0) return
 
-        val position = getCurrentPosition()
-
-        for (listener in mOnItemSelectedListener) {
-            listener.onItemSelected(position)
-        }
+    override fun dispatchOnItemScrollInSelected(itemView: View, position: Int) {
+        if (childCount == 0) return
+        super.dispatchOnItemScrollInSelected(itemView, position)
     }
 
-    /**
-     * item选中回调
-     */
-    open fun onItemSelected(child: View, position: Int) {
-        log("onItemSelected::$position")
-
-        for (listener in mOnItemFillListener) {
-            listener.onItemSelected(child, position)
-        }
+    override fun dispatchOnItemScrollOutSelected(itemView: View, position: Int) {
+        if (childCount == 0) return
+        super.dispatchOnItemScrollOutSelected(itemView, position)
     }
 
-    /**
-     * item取消选中
-     */
-    open fun onItemUnSelected(child: View, position: Int) {
-        log("onItemUnSelected::$position")
-
-        for (listener in mOnItemFillListener) {
-            listener.onItemUnSelected(child, position)
-        }
+    override fun dispatchOnItemSelected(position: Int) {
+        if (childCount == 0) return
+        super.dispatchOnItemSelected(position)
     }
 
-    /**
-     * 当item填充或者滚动的时候回调
-     */
-    interface OnItemFillListener {
-        fun onItemSelected(itemView: View, position: Int)
-        fun onItemUnSelected(itemView: View, position: Int)
+    override fun getOnItemFillListener(): Set<OnItemScrollListener> {
+        return mOnItemScrollListener
     }
 
-    fun interface OnItemSelectedListener {
-        fun onItemSelected(position: Int)
+    override fun getOnItemSelectedListener(): Set<OnItemSelectedListener> {
+        return mOnItemSelectedListener
     }
 
-    /**
-     *
-     */
-    fun addOnItemFillListener(listener: OnItemFillListener) {
-        mOnItemFillListener.add(listener)
+
+    override fun addOnItemFillListener(listener: OnItemScrollListener) {
+        mOnItemScrollListener.add(listener)
     }
 
-    /**
-     *
-     */
-    fun removeOnItemFillListener(listener: OnItemFillListener) {
-        mOnItemFillListener.remove(listener)
+    override fun removeOnItemFillListener(listener: OnItemScrollListener) {
+        mOnItemScrollListener.remove(listener)
     }
 
-    /**
-     *
-     */
-    fun removeAllItemFillListener() {
-        mOnItemFillListener.clear()
+    override fun removeAllItemFillListener() {
+        mOnItemScrollListener.clear()
+    }
+
+    override fun addOnItemSelectedListener(listener: OnItemSelectedListener) {
+        mOnItemSelectedListener.add(listener)
+    }
+
+    override fun removeOnItemSelectedListener(listener: OnItemSelectedListener) {
+        mOnItemSelectedListener.remove(listener)
+    }
+
+    override fun removeAllItemSelectedListener() {
+        mOnItemSelectedListener.clear()
     }
 
 }
 
 fun log(msg: Any) {
-    Log.e("WheelLayoutManager", msg.toString())
+//    Log.e("WheelLayoutManager", msg.toString())
 }
