@@ -5,15 +5,14 @@ import android.graphics.Rect
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.OrientationHelper
 import androidx.recyclerview.widget.RecyclerView
 import cn.yize.funny.recycleview.Gravity
 import cn.yize.funny.recycleview.Orientation
+import cn.yize.funny.recycleview.decoration.WheelDecoration
 import cn.yize.funny.recycleview.snaphelper.GravitySnapHelper
 import kotlin.math.abs
-import kotlin.math.log
 import kotlin.math.roundToInt
 
 class WheelLayoutManager(
@@ -22,7 +21,10 @@ class WheelLayoutManager(
     val orientation: Orientation = Orientation.VERTICAL,
     val gravity: Gravity = Gravity.CENTER,
     /** [smoothScrollToPosition] 的速度 倍数, 值越大,速度越慢 */
-    val smoothSpeed: Float = 20F,
+    val smoothSpeed: Float = 10F,
+    val alpha: Float = 0.8F,
+    val scale: Float = 0.9F,
+    val transformView: Boolean = true
 ) : RecyclerView.LayoutManager(),
     RecyclerView.SmoothScroller.ScrollVectorProvider {
 
@@ -42,7 +44,7 @@ class WheelLayoutManager(
 
     private val snapHelper = GravitySnapHelper(gravity)
 
-    private val orientationHelper by lazy {
+    val orientationHelper by lazy {
         if (orientation == Orientation.VERTICAL) {
             OrientationHelper.createVerticalHelper(this)
         } else {
@@ -67,9 +69,13 @@ class WheelLayoutManager(
      * 使用该类设置
      * @param view RecyclerView
      */
-    fun attach(view: RecyclerView) {
+    fun attach(view: RecyclerView, decoration: WheelDecoration? = null) {
         view.layoutManager = this
         snapHelper.attachToRecyclerView(view)
+
+        if (decoration != null) {
+            view.addItemDecoration(decoration)
+        }
     }
 
 
@@ -366,6 +372,9 @@ class WheelLayoutManager(
 
     /** 转换 views */
     private fun transformViews() {
+        if (!transformView) {
+            return
+        }
 
         if (childCount == 0) return
 
@@ -373,19 +382,42 @@ class WheelLayoutManager(
         (0..childCount)
             .mapNotNull {
                 getChildAt(it)
-            }.forEach {
-                val position = getPosition(it)
+            }.forEach { child ->
+                val position = getPosition(child)
+
+                if (transformView) {
+                    calculateTransform(scale, 1F, abs(position - currentItem))
+                        .let {
+                            child.scaleY = it
+                            child.scaleX = it
+                        }
+                    child.alpha = calculateTransform(alpha, 1F, abs(position - currentItem))
+                }
+
                 if (currentItem == position) {
-                    it.scaleY = 1F
-                    it.scaleX = 1F
-                    onItemSelected(it, position)
+                    onItemSelected(child, position)
                 } else {
-                    it.scaleY = 0.8F
-                    it.scaleX = 0.8F
-                    onItemUnSelected(it, position)
+                    onItemUnSelected(child, position)
                 }
             }
+    }
 
+    private fun calculateTransform(minValue: Float, maxValue: Float, positionDelta: Int): Float {
+
+        if (positionDelta == 0) return maxValue
+
+        return minValue
+
+
+//        val space = visibleCount / 2
+//
+//        if (positionDelta >= space) {
+//            return minValue
+//        }
+//
+//        val spaceValue = (maxValue - minValue) / space
+//
+//        return maxValue - positionDelta * spaceValue
     }
 
 

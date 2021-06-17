@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
-import cn.yize.funny.recycleview.Orientation
+import cn.yize.funny.recycleview.decoration.WheelDecoration
 import cn.yize.funny.recycleview.layoutmanager.wheel.WheelLayoutManager
 
 class MainActivity : AppCompatActivity() {
@@ -22,13 +22,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
 
-        WheelLayoutManager().attach(recyclerView)
+        WheelLayoutManager().attach(recyclerView, WheelDecoration(this))
 
         recyclerView.adapter = MyAdapter(this)
 
 
         recyclerView.postDelayed({
-            recyclerView.smoothScrollToPosition(20)
+            recyclerView.smoothScrollToPosition(1)
         }, 3000)
     }
 }
