@@ -18,15 +18,24 @@ import kotlin.math.roundToInt
 class WheelLayoutManager(
     /** 显示的条目 */
     val visibleCount: Int = 5,
-    val orientation: Orientation = Orientation.VERTICAL,
+    val orientation: Orientation = DEFAULT_ORIENTATION,
     val gravity: Gravity = Gravity.CENTER,
     /** [smoothScrollToPosition] 的速度 倍数, 值越大,速度越慢 */
-    val smoothSpeed: Float = 10F,
-    val alpha: Float = 0.8F,
-    val scale: Float = 0.9F,
-    val transformView: Boolean = true
+    private val smoothSpeed: Float = DEFAULT_SMOOTH_SPEED,
+    private val alpha: Float = DEFAULT_ALPHA,
+    private val scale: Float = DEFAULT_SCALE,
+    private val transformView: Boolean = DEFAULT_TRANSFORM_VIEW
 ) : RecyclerView.LayoutManager(),
     RecyclerView.SmoothScroller.ScrollVectorProvider {
+
+
+    companion object {
+        const val DEFAULT_SMOOTH_SPEED = 10F
+        val DEFAULT_ORIENTATION = Orientation.VERTICAL
+        const val DEFAULT_ALPHA = 0.8F
+        const val DEFAULT_SCALE = 0.9F
+        const val DEFAULT_TRANSFORM_VIEW = false
+    }
 
 
     //保存下item的width和height‘’
@@ -372,9 +381,6 @@ class WheelLayoutManager(
 
     /** 转换 views */
     private fun transformViews() {
-        if (!transformView) {
-            return
-        }
 
         if (childCount == 0) return
 

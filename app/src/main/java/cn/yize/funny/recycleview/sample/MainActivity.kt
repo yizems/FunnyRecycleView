@@ -8,28 +8,26 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
-import cn.yize.funny.recycleview.decoration.WheelDecoration
-import cn.yize.funny.recycleview.layoutmanager.wheel.WheelLayoutManager
+import cn.yize.funny.recycleview.widget.TextPickerRecycleView
 
 class MainActivity : AppCompatActivity() {
 
     private val recyclerView by lazy {
-        findViewById<RecyclerView>(R.id.recycleView)
+        findViewById<TextPickerRecycleView>(R.id.recycleView)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        recyclerView.addData((0..50).map { "哈哈哈哈::$it" })
 
-        WheelLayoutManager().attach(recyclerView, WheelDecoration(this))
-
-        recyclerView.adapter = MyAdapter(this)
-
-
-        recyclerView.postDelayed({
-            recyclerView.smoothScrollToPosition(1)
-        }, 3000)
+//        recyclerView.adapter = MyAdapter(this)
+//
+//
+//        recyclerView.postDelayed({
+//            recyclerView.smoothScrollToPosition(1)
+//        }, 3000)
     }
 }
 
