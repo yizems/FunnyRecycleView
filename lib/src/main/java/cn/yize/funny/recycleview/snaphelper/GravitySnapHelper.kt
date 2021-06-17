@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView.SmoothScroller.ScrollVectorProv
 import androidx.recyclerview.widget.SnapHelper
 import cn.yize.funny.recycleview.Gravity
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 /**
  * 从 [androidx.recyclerview.widget.LinearSnapHelper] 复制而来
@@ -155,8 +156,8 @@ class GravitySnapHelper(
             return 0
         }
         val distance =
-            if (Math.abs(distances[0]) > Math.abs(distances[1])) distances[0] else distances[1]
-        return Math.round(distance / distancePerChild)
+            if (abs(distances[0]) > abs(distances[1])) distances[0] else distances[1]
+        return (distance / distancePerChild).roundToInt()
     }
 
     /**
