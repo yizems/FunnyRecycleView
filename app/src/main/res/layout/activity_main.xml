@@ -3,11 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
     <cn.yize.funny.recycleview.widget.TextPickerRecycleView
         android:id="@+id/recycleView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
+    <cn.yize.funny.recycleview.widget.datepicker.DateTimePickerView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp" />
 
 </LinearLayout>

@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.RecyclerView
 import cn.yize.funny.recycleview.Gravity
+import cn.yize.funny.recycleview.adapter.AbsTextViewAdapter
 import cn.yize.funny.recycleview.adapter.SimpleTextAdapter
 import cn.yize.funny.recycleview.config.Config
 import cn.yize.funny.recycleview.config.DefaultConfigOwner
@@ -149,6 +150,14 @@ class TextPickerRecycleView @JvmOverloads constructor(
         if (adapter == null) {
             adapter = SimpleTextAdapter(context, mData)
         }
+    }
+
+
+    override fun setAdapter(adapter: Adapter<*>?) {
+        if (adapter !is AbsTextViewAdapter) {
+            throw IllegalArgumentException("参数类型错误: 只接受 SimpleTextAdapter 的子类")
+        }
+        super.setAdapter(adapter)
     }
 
     private fun setupLayoutManager() {

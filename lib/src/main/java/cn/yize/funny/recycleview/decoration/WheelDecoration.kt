@@ -3,11 +3,11 @@ package cn.yize.funny.recycleview.decoration
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.util.TypedValue
 import androidx.recyclerview.widget.RecyclerView
 import cn.yize.funny.recycleview.Gravity
 import cn.yize.funny.recycleview.Orientation
 import cn.yize.funny.recycleview.layoutmanager.wheel.WheelLayoutManager
+import cn.yize.funny.recycleview.util.SizeUtil.dp2px
 
 /**
  * 用于居中
@@ -25,7 +25,7 @@ class WheelDecoration(
         isAntiAlias = true
     }
 
-    private val paddingPx = dp2px(linePadding)
+    private val paddingPx = linePadding.dp2px(context)
 
     override fun onDrawOver(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
 
@@ -80,12 +80,5 @@ class WheelDecoration(
                 paint,
             )
         }
-    }
-
-    private fun dp2px(dpVal: Float): Int {
-        return TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            dpVal, context.resources.displayMetrics
-        ).toInt()
     }
 }
