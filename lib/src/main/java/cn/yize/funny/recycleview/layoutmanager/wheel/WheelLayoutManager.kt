@@ -17,6 +17,8 @@ import cn.yize.funny.recycleview.listener.OnItemScrollListener
 import cn.yize.funny.recycleview.listener.OnItemSelectedListener
 import cn.yize.funny.recycleview.snaphelper.GravitySnapHelper
 import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 class WheelLayoutManager(
@@ -114,9 +116,11 @@ class WheelLayoutManager(
             mOffset = mMaxOffset
         }
 
-        val startIndex = getCurrentPosition()
+        val startIndex = max(getCurrentPosition() - getStartOffset(), 0)
 
-        (startIndex until startIndex + getEndOffset() + 1)
+        val endIndex = min(startIndex + getEndOffset() + 1, state.itemCount)
+
+        (startIndex until endIndex)
             .forEach { position ->
                 val child = recycler.getViewForPosition(position)
                 addView(child)
