@@ -2,6 +2,7 @@ package cn.yize.funny.recycleview.sample
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -9,11 +10,16 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import cn.yize.funny.recycleview.widget.TextPickerRecycleView
+import cn.yize.funny.recycleview.widget.datepicker.DateTimePickerView
 
 class MainActivity : AppCompatActivity() {
 
     private val recyclerView by lazy {
         findViewById<TextPickerRecycleView>(R.id.recycleView)
+    }
+
+    private val dateTimePickerView by lazy {
+        findViewById<DateTimePickerView>(R.id.date_time_picker)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,6 +34,11 @@ class MainActivity : AppCompatActivity() {
 //        recyclerView.postDelayed({
 //            recyclerView.smoothScrollToPosition(1)
 //        }, 3000)
+
+        dateTimePickerView.onSelectedListener = {
+            Log.e("MainActivity", it.formatStr)
+            //            val (time, fieldMap, formatStr) = dateTimePickerView.getSelectedDateTime()
+        }
     }
 }
 

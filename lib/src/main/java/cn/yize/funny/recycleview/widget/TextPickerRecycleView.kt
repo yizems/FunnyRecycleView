@@ -10,6 +10,9 @@ import cn.yize.funny.recycleview.config.Config
 import cn.yize.funny.recycleview.config.DefaultConfigOwner
 import cn.yize.funny.recycleview.decoration.WheelDecoration
 import cn.yize.funny.recycleview.layoutmanager.wheel.WheelLayoutManager
+import cn.yize.funny.recycleview.listener.IListenerDelegate
+import cn.yize.funny.recycleview.listener.IListenerDelegateOwner
+import cn.yize.funny.recycleview.listener.ListenerDelegate
 import cn.yize.funny.recycleview.listener.transform.TextViewColorSizeTransform
 
 /**
@@ -19,7 +22,7 @@ class TextPickerRecycleView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : RecyclerView(context, attrs, defStyleAttr) {
+) : RecyclerView(context, attrs, defStyleAttr), IListenerDelegateOwner {
 
 
     companion object : DefaultConfigOwner {
@@ -139,10 +142,27 @@ class TextPickerRecycleView @JvmOverloads constructor(
     //endregion
 
 
+    /** 被 添加到 window过, 属性变化才允许重建 layoutmanager */
+    private var enableSetupLayoutManager = false
+
+    private val listenerDelegate = ListenerDelegate()
+
+
     private val mData = mutableListOf<String>()
+
+
+    init {
+        listenerDelegate.addOnItemScrollListener(
+            TextViewColorSizeTransform(
+                selectTextColor, unSelectTextColor, selectTextSizeSp, unSelectTextSizeSp
+            )
+        )
+    }
+
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        enableSetupLayoutManager = true
         if (layoutManager == null) {
             setupLayoutManager()
         }
@@ -161,7 +181,7 @@ class TextPickerRecycleView @JvmOverloads constructor(
     }
 
     private fun setupLayoutManager() {
-        if (!isAttachedToWindow) {
+        if (!enableSetupLayoutManager) {
             return
         }
 
@@ -172,13 +192,9 @@ class TextPickerRecycleView @JvmOverloads constructor(
         WheelLayoutManager(
             visibleCount, orientation, gravity, smoothSpeed,
             childAlpha, scale, transformView,
+            listenerDelegate,
         ).apply {
 
-            addOnItemFillListener(
-                TextViewColorSizeTransform(
-                    selectTextColor, unSelectTextColor, selectTextSizeSp, unSelectTextSizeSp
-                )
-            )
             attach(this@TextPickerRecycleView, decoration)
         }
     }
@@ -216,5 +232,14 @@ class TextPickerRecycleView @JvmOverloads constructor(
         adapter?.notifyDataSetChanged()
     }
 
+
+    override fun getListenerDelegate(): IListenerDelegate {
+        return listenerDelegate
+    }
+
+
+    fun getCurrentPosition(): Int {
+        return layoutManager?.getCurrentPosition() ?: 0
+    }
 
 }

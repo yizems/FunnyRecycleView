@@ -12,6 +12,7 @@
         android:layout_height="wrap_content" />
 
     <cn.yize.funny.recycleview.widget.datepicker.DateTimePickerView
+        android:id="@+id/date_time_picker"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp" />
