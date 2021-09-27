@@ -1,4 +1,4 @@
-## 花式RecycleView
+## 花式RecycleView [![](https://jitpack.io/v/yizems/FunnyRecycleView.svg)](https://jitpack.io/#yizems/FunnyRecycleView)
 
 RecycleView 绝对是最值得深入学习的 UI 组件;
 
