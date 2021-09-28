@@ -92,11 +92,18 @@ class DateTimePickerView @JvmOverloads constructor(
             return
         }
 
-        mFields.forEach {
+        mFields.forEachIndexed { index, it ->
 
-            val minValue = minTime.get(it.calendarField)
+            var minValue = minTime.get(it.calendarField)
 
-            val maxValue = maxTime.get(it.calendarField)
+            var maxValue = maxTime.get(it.calendarField)
+
+            //非第一个, 修复后面数据可能为空的问题
+            if (index != 0 && maxValue < minValue) {
+                minValue = 0
+                maxValue = 1
+            }
+
 
             val adapter =
                 SimpleNumberAdapter(
