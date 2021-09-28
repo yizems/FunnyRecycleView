@@ -111,17 +111,17 @@ class DateTimePickerView @JvmOverloads constructor(
             fieldViews[it] = createItemAndView().apply {
                 this.pickerView.adapter = adapter
                 this.titleTv.text = it.title
-                this.pickerView.layoutManager
-
-                this.pickerView.post {
-                    this.pickerView.addOnItemSelectedListener { position ->
-                        onItemSelected(it, position)
-                    }
-                }
             }
         }
-
-        setToCurrentDay()
+        // 延迟加载
+        fieldViews[mFields.last()]!!.pickerView.post {
+            fieldViews.forEach {
+                fieldViews[it.key]!!.pickerView.addOnItemSelectedListener { position ->
+                    onItemSelected(it.key, position)
+                }
+            }
+            setToCurrentDay()
+        }
     }
 
 
