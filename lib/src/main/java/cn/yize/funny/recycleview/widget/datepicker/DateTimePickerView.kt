@@ -98,9 +98,9 @@ class DateTimePickerView @JvmOverloads constructor(
 
             var maxValue = maxTime.get(it.calendarField)
 
-            //非第一个, 修复后面数据可能为空的问题
+            //非第一个, 修复后面数据为空的导致View没有初始化的问题
             if (index != 0 && maxValue < minValue) {
-                minValue = 0
+                minValue = 1
                 maxValue = 1
             }
 
