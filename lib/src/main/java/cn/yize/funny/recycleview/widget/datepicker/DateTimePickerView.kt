@@ -56,6 +56,8 @@ class DateTimePickerView @JvmOverloads constructor(
 
     private var mMode: Mode = Mode.DATETIME
 
+    private var visibleItemCounts = 5
+
     var onSelectedListener: ((
         ret: SelectedDateTime
     ) -> Unit)? = null
@@ -159,6 +161,8 @@ class DateTimePickerView @JvmOverloads constructor(
         wrapper.addView(titleView)
 
         val textPickerRecycleView = TextPickerRecycleView(context)
+
+        textPickerRecycleView.visibleCount = visibleItemCounts
 
         wrapper.addView(textPickerRecycleView)
 
@@ -283,6 +287,11 @@ class DateTimePickerView @JvmOverloads constructor(
         this.mMode = mode
         initMode()
     }
+
+    fun setVisibleItemCount(count: Int) {
+        this.visibleItemCounts = count
+    }
+
 
     /**
      * 获取当前选择的时间
