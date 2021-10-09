@@ -142,9 +142,6 @@ class TextPickerRecycleView @JvmOverloads constructor(
     //endregion
 
 
-    /** 被 添加到 window过, 属性变化才允许重建 layoutmanager */
-    private var enableSetupLayoutManager = false
-
     private val listenerDelegate = ListenerDelegate()
 
 
@@ -162,7 +159,6 @@ class TextPickerRecycleView @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        enableSetupLayoutManager = true
         if (layoutManager == null) {
             setupLayoutManager()
         }
@@ -181,9 +177,6 @@ class TextPickerRecycleView @JvmOverloads constructor(
     }
 
     private fun setupLayoutManager() {
-        if (!enableSetupLayoutManager) {
-            return
-        }
 
         val decoration =
             if (showDivider) WheelDecoration(context, dividerColor, dividerHeightDp, dividerPadding)

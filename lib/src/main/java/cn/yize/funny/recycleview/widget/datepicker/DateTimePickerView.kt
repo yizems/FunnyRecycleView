@@ -49,9 +49,6 @@ class DateTimePickerView @JvmOverloads constructor(
     }
 
     private var currentTime = Calendar.getInstance()
-        .apply {
-            this.timeInMillis = 0
-        }
 
 
     private var mMode: Mode = Mode.DATETIME
@@ -84,6 +81,8 @@ class DateTimePickerView @JvmOverloads constructor(
 
     private fun setupViews() {
 
+        currentTime = Calendar.getInstance()
+
         // 未设置 mode
         if (mFields.isEmpty()) {
             return
@@ -94,18 +93,19 @@ class DateTimePickerView @JvmOverloads constructor(
             return
         }
 
-        mFields.forEachIndexed { index, it ->
+        mFields.forEachIndexed { _, it ->
 
-            var minValue = minTime.get(it.calendarField)
+            val minValue = computeMinValue(it, currentTime)
 
-            var maxValue = maxTime.get(it.calendarField)
+            val maxValue = computeMaxValue(it, currentTime)
 
-            //非第一个, 修复后面数据为空的导致View没有初始化的问题
-            if (index != 0 && maxValue < minValue) {
-                minValue = 1
-                maxValue = 1
+            if (currentTime[it.calendarField] > maxValue) {
+                currentTime.set(it.calendarField, maxValue)
             }
 
+            if (currentTime[it.calendarField] < minValue) {
+                currentTime.set(it.calendarField, minValue)
+            }
 
             val adapter =
                 SimpleNumberAdapter(
@@ -117,9 +117,14 @@ class DateTimePickerView @JvmOverloads constructor(
 
             fieldAdapters[it] = adapter
 
+            val position = adapter.getPosition(currentTime[it.calendarField])
+
             fieldViews[it] = createItemAndView().apply {
                 this.pickerView.adapter = adapter
                 this.titleTv.text = it.title
+                this.pickerView.post {
+                    this.pickerView.scrollToPosition(position)
+                }
             }
         }
         // 延迟加载
@@ -129,7 +134,6 @@ class DateTimePickerView @JvmOverloads constructor(
                     onItemSelected(it.key, position)
                 }
             }
-            setToCurrentDay()
         }
     }
 
@@ -171,19 +175,6 @@ class DateTimePickerView @JvmOverloads constructor(
         return ViewHolder(titleView, textPickerRecycleView)
     }
 
-    /**
-     * 初始化选中当天日期
-     * @return Boolean
-     */
-    private fun setToCurrentDay() = fieldViews[mFields.last()]!!.pickerView.post {
-        mFields.first()
-            .let {
-                changedField(
-                    it,
-                    max(Calendar.getInstance()[it.calendarField], minTime.get(it.calendarField))
-                )
-            }
-    }
 
     private fun onItemSelected(changedField: DateTimeField, position: Int) = post {
 

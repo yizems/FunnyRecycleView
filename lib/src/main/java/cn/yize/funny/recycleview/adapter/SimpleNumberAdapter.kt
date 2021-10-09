@@ -6,7 +6,7 @@ import android.content.Context
  *
  * @property minValue Int 开区间
  * @property maxValue Int 开区间
- * @property valueOffset 实际数值便宜值, 加上或减去一个数值
+ * @property valueOffset 实际数值偏移值, 加上或减去一个数值
  * @constructor
  */
 open class SimpleNumberAdapter(
@@ -50,6 +50,10 @@ open class SimpleNumberAdapter(
      * @return Int
      */
     fun getPosition(value: Int): Int {
+        return value - minValue
+    }
+
+    fun getPositionWithOffset(value: Int): Int {
         return value - minValue - valueOffset
     }
 
